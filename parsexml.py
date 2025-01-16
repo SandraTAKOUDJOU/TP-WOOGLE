@@ -6,6 +6,13 @@ import re
 import pickle
 import glob
 from itertools import chain
+import time
+from collections import Counter
+import math
+
+
+
+start = time.time()
 
 xmlFiles = list(chain(*[ glob.glob(globName)  for globName in sys.argv[1:] ]))
 print("Files as input:", xmlFiles)
@@ -31,8 +38,8 @@ for xmlFile in xmlFiles:
 
 
 # Some regEx for parsing
-cleanExtLinks =  r"[.]" #TO COMPLETE (1 expression)
-linkRe =#TO COMPLETE (1 expression)
+cleanExtLinks = "\[[.]+\]|{{[.]+}}"   #TO COMPLETE (1 expression)
+linkRe = "\[\[([^\|]+)(\|[^\|])+\]\]"  #TO COMPLETE (1 expression)
 removeLinkRe = "\[\[[^\]]+\|([^\|\]]+)\]\]"
 removeLink2Re =  "\[\[([^\|\]]+)\]\]"
 wordRe = "[a-zA-Z\-]+"
@@ -78,28 +85,53 @@ Ndocs = len(docList)
 
 tokInfo = defaultdict(float) # tokInfo[tok] contains the information in bits of the token
 tf = dict() # tf[doc][tok] contains the frequency of the token tok in document doc
- #TO COMPLETE
- #TO COMPLETE
- #TO COMPLETE
- #TO COMPLETE
- #TO COMPLETE
- #TO COMPLETE
+  
 
- #TO COMPLETE
- #TO COMPLETE
- #TO COMPLETE
- #TO COMPLETE
+for doc, toks in doctok.items(): # Building tf table
+    comptes_tok = Counter(toks)
+    
+    tf_doc = {tok : comptes_tok[tok] / len(toks) for tok in comptes_tok}
+    tf[doc] = tf_doc
+    
 
- #TO COMPLETE
- #TO COMPLETE
+idf = dict() # Building idf table    
+
+wordset = set()
+N = len(doctok)
+
+for toks in doctok.values():
+    wordset.update(toks)
+    
+
+for tok in wordset:
+    N_tok = sum([1 for toks in doctok.values() if tok in toks])  
+    if N_tok !=0:
+       idf[tok]= - math.log(N_tok/N)
+       
+    
 
 print("done.")
 
 print("creating tf-idf...",end="")
 tfidf = defaultdict(dict) # this should be in reverse sparse format
- #TO COMPLETE
- #TO COMPLETE
- #TO COMPLETE
+
+#*****************************************************PARSE INDEX ***********************************************************************************
+
+for doc, tf_doc in tf.items():
+    tfidf[doc] = {tok : tf_doc[tok] * idf[tok] for tok in tf_doc}
+
+
+#*****************************************************REVERSE PARSE INDEX ***********************************************************************************
+
+re_tfidf = dict()
+for doc, toks_score in tfidf.items():
+    for tok, score in toks_score.items():
+        if tok not in re_tfidf:
+            re_tfidf[tok] = dict()
+        re_tfidf[tok][doc] = score
+            
+            
+ 
 print("done.")
 
 
@@ -113,3 +145,7 @@ with open("tfidf.dict",'wb') as fileout:
 with open("tokInfo.dict",'wb') as fileout:
 	pickle.dump(tokInfo, fileout, protocol=pickle.HIGHEST_PROTOCOL)
 
+end = time.time()
+
+
+print('DURATION = ', end - start)
