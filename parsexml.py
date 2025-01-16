@@ -15,6 +15,7 @@ import math
 start = time.time()
 
 xmlFiles = list(chain(*[ glob.glob(globName)  for globName in sys.argv[1:] ]))
+xmlFiles = ['dws\\xaa.chunks']
 print("Files as input:", xmlFiles)
 
 docs = dict()
@@ -35,11 +36,11 @@ for xmlFile in xmlFiles:
 			if contents:
 				docs[titles[0].text] = contents[0].text 
 
-
+print(pages)
 
 # Some regEx for parsing
 cleanExtLinks = "\[[.]+\]|{{[.]+}}"   #TO COMPLETE (1 expression)
-linkRe = "\[\[([^\|]+)(\|[^\|])+\]\]"  #TO COMPLETE (1 expression)
+linkRe = "\[\[([^\|])+(\|[^\|])*\]\]"  #TO COMPLETE (1 expression)
 removeLinkRe = "\[\[[^\]]+\|([^\|\]]+)\]\]"
 removeLink2Re =  "\[\[([^\|\]]+)\]\]"
 wordRe = "[a-zA-Z\-]+"
@@ -59,6 +60,7 @@ for idx,doc in enumerate(docs):
 		target = link.group(1).split('|')[0]
 		if target in docs.keys():
 			#print(doc + " --> " + target)
+			links[doc] += [target]
 			links[doc] += [target]
 			
 	cleanDoc = re.sub(cleanExtLinks,"",docs[doc])
@@ -123,12 +125,12 @@ for doc, tf_doc in tf.items():
 
 #*****************************************************REVERSE PARSE INDEX ***********************************************************************************
 
-re_tfidf = dict()
-for doc, toks_score in tfidf.items():
-    for tok, score in toks_score.items():
-        if tok not in re_tfidf:
-            re_tfidf[tok] = dict()
-        re_tfidf[tok][doc] = score
+
+#re_tfidf = dict()
+#for doc, toks_score in tfidf.items():
+#    for tok, score in toks_score.items():
+#        if tok not in re_tfidf:
+#            re_tfidf[tok] = dict()
             
             
  
@@ -141,6 +143,9 @@ with open("links.dict",'wb') as fileout:
 
 with open("tfidf.dict",'wb') as fileout:
 	pickle.dump(tfidf, fileout, protocol=pickle.HIGHEST_PROTOCOL)
+	pickle.dump(tfidf, fileout, protocol=pickle.HIGHEST_PROTOCOL)
+ 
+#with open("re_tfidf.dict",'wb') as fileout:
 
 with open("tokInfo.dict",'wb') as fileout:
 	pickle.dump(tokInfo, fileout, protocol=pickle.HIGHEST_PROTOCOL)
