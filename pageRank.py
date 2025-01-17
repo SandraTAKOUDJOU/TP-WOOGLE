@@ -75,3 +75,5 @@ print(f"The page with the highest rank is: {highest_rank_page}")
 # Save the ranks as pickle object
 with open("pageRank.dict",'wb') as fileout:
 	pickle.dump(pageRankDict, fileout, protocol=pickle.HIGHEST_PROTOCOL)
+	#tzdv
+	
